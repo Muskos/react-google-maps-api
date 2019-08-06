@@ -10,6 +10,7 @@ import { getOffsetOverride, getLayoutStyles } from "./dom-helper"
 
 interface OverlayViewState {
   overlayView: google.maps.OverlayView | null;
+  firstDraw: boolean;
 }
 
 export interface OverlayViewProps {
@@ -52,7 +53,8 @@ export class OverlayView extends React.PureComponent<
   static contextType = MapContext
 
   state: OverlayViewState = {
-    overlayView: null
+    overlayView: null,
+    firstDraw: true
   }
 
   containerElement: HTMLElement | null = null
@@ -125,7 +127,13 @@ export class OverlayView extends React.PureComponent<
 
     this.onPositionElement()
 
-    this.forceUpdate()
+    // Since draw happens after render, forceUpdate forces
+    // the component to re-render after position has been applied
+    // this should only happen on first draw
+    if (this.state.firstDraw) {
+      this.forceUpdate();
+      this.setState({firstDraw: false})
+    }
   }
 
   // eslint-disable-next-line @getify/proper-arrows/this, @getify/proper-arrows/name
